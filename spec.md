@@ -86,7 +86,7 @@ Hai kịch bản đắt nhất là hai kiểu sai khác nhau, đều là **lỗi
 
 Câu này không hứa "mình sẽ báo giảng viên". Nó chỉ nói việc AI thật sự làm được: gửi TA qua `chuyen_TA`.
 
-**Người dùng thấy ngoài câu chữ** `[ảnh số ?]`:
+**Người dùng thấy ngoài câu chữ**:
 
 - Thẻ nguồn "Tài liệu buổi 3 · §3.3", kèm nhãn vàng "Nghi sai, chưa kiểm với giảng viên".
 - Độ chắc tách hai tầng: "Phép tính phản ví dụ: chắc, tự kiểm được" và "Nội dung tài liệu: chưa xác nhận".
@@ -137,7 +137,7 @@ Câu này không hứa "mình sẽ báo giảng viên". Nó chỉ nói việc AI
 
 Phản hồi giống hệt dù đáp số đúng hay sai. Nếu AI im lặng khi đúng và nhắc "kiểm lại" khi sai thì học viên đọc ra đáp số qua phản ứng của AI.
 
-**Người dùng thấy ngoài câu chữ** `[ảnh số ?]`:
+**Người dùng thấy ngoài câu chữ**:
 
 - Thẻ trạng thái: "Bài tập 3: đang mở, hạn 13/11 23:59 (nguồn: trang khoá học)".
 - Hai nút: [Gợi ý bước đầu] và [Hỏi TA]. **Không có nút "Xác nhận đáp số".**
