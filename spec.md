@@ -67,6 +67,128 @@ Với mỗi kịch bản đắt nhất:
 - 2–3 nguyên tắc HAX/PAIR, mỗi cái trỏ vào một chỗ cụ thể (câu chữ hoặc chỗ trên màn hình).
 - Lỗi nào sửa câu chữ không cứu được (nếu có), và thiết kế cứu nó thế nào.
 
+Hai kịch bản đắt nhất là hai kiểu sai khác nhau, đều là **lỗi ngữ cảnh** nên chủ yếu sửa bằng thiết kế, không chỉ bằng câu chữ:
+
+- **#1:** AI làm đúng quy trình (trích đúng §3.3) nhưng **nguồn sai**.
+- **#6:** học viên tính đúng (trung bình 15,25 và trung vị 11,5 đều đúng với dữ liệu bài 3). Nếu AI nói "đúng rồi" thì nội dung không sai, nhưng AI đã xác nhận đáp số của một bài đang mở (hạn 13/11 23:59), điều mà lát cắt cấm. Cái sai là **thời điểm**, không phải con số.
+
+---
+
+### Kịch bản #1 · Tài liệu §3.3 có câu sai
+
+**Tin nhắn:** "Độ lệch chuẩn với phương sai cái nào lớn hơn?"
+
+**Quyết định:** trả lời kèm giới hạn, rồi đề nghị gửi TA (học viên bấm).
+
+**AI nói nguyên văn:**
+
+> "Tài liệu buổi 3, §3.3 ghi độ lệch chuẩn luôn nhỏ hơn phương sai. Mình nghĩ câu này cần xem lại: nó chỉ đúng khi phương sai lớn hơn 1. Ví dụ phương sai là 0,25 thì độ lệch chuẩn là √0,25 = 0,5, lớn hơn phương sai. Phần chắc chắn ở §3.3 là độ lệch chuẩn bằng căn bậc hai của phương sai. Mình không sửa được tài liệu và chưa hỏi được giảng viên, nên bạn chưa nên ghi câu đó vào ghi chú. Bạn muốn gửi câu này cho TA không? TA trả lời trong giờ 08:00–22:00."
+
+Câu này không hứa "mình sẽ báo giảng viên". Nó chỉ nói việc AI thật sự làm được: gửi TA qua `chuyen_TA`.
+
+**Người dùng thấy ngoài câu chữ** `[ảnh số ?]`:
+
+- Thẻ nguồn "Tài liệu buổi 3 · §3.3", kèm nhãn vàng "Nghi sai, chưa kiểm với giảng viên".
+- Độ chắc tách hai tầng: "Phép tính phản ví dụ: chắc, tự kiểm được" và "Nội dung tài liệu: chưa xác nhận".
+- Hai nút: [Gửi TA] và [Để sau].
+
+**Bước tiếp theo của học viên:**
+
+- Tự thử một ví dụ khác (phương sai 4 thì độ lệch chuẩn 2) để thấy cả hai trường hợp.
+- Hoặc bấm [Gửi TA].
+- Nếu không làm gì thì lỗi không ai biết và học viên sau sẽ gặp lại. Vì vậy nhóm cân nhắc thêm tool `danh_dau_nghi_sai` (xem §4).
+
+**Ai được báo, sau bao lâu:**
+
+- TA nhận qua `chuyen_TA`, thấy mã §3.3, câu nghi sai, phản ví dụ và giờ hỏi.
+- Nếu hỏi lúc 22:12 thì TA thấy từ 08:00 sáng hôm sau.
+- Giảng viên không được AI báo trực tiếp vì không có tool nào làm việc đó. TA là người chuyển tiếp.
+
+**Phương án đã loại:**
+
+| Phương án | Vì sao loại |
+|---|---|
+| Trích nguyên §3.3 cho trung thực với nguồn | Giảng viên muốn có căn cứ, nhưng ở đây mã mục làm lỗi trông đáng tin hơn. Đây chính là cái bẫy của #1. |
+| Tự sửa ngầm, trả lời đúng mà không nhắc tài liệu sai | Học viên đối chiếu tài liệu sẽ thấy mâu thuẫn mà không hiểu vì sao. Giảng viên cũng không biết tài liệu sai. |
+| Từ chối, chuyển TA hết | Hỏi lúc 22:xx thì không có TA, học viên kẹt đúng tình huống mà lát cắt muốn giải. |
+| Đăng cảnh báo lên FAQ (`dang_FAQ`) | AI chưa được giảng viên xác nhận mà đã sửa tài liệu trước cả lớp. Nếu AI nhầm thì nhiều người đã đọc rồi. |
+| Hỏi lại "bạn hỏi về mục nào?" | Câu hỏi đã rõ, hỏi lại chỉ làm chậm. |
+
+**Loại lỗi: lỗi ngữ cảnh (nguồn).** Hệ thống chạy đúng thiết kế, tài liệu mới là cái sai.
+
+- **Cách nói:** không xin lỗi kiểu "mình sai", vì AI chưa sai. Nói thẳng "câu này cần xem lại".
+- **Cách sửa:** sửa thiết kế (cờ nghi sai, đường báo TA), không chỉ sửa câu chữ.
+
+**Lỗi sửa câu chữ không cứu được:** nếu để model tự viết "mình đã báo giảng viên", nó có thể viết nhầm dù chưa gọi tool nào.
+
+- **Thiết kế cứu:** dòng "Đã gửi TA lúc 22:12" do hệ thống in từ kết quả trả về của `chuyen_TA`, không do model sinh. Tool chưa chạy xong thì dòng đó không xuất hiện.
+
+---
+
+### Kịch bản #6 · Xin xác nhận đáp số bài đang mở
+
+**Tin nhắn:** "Em tính bài 3 ra trung bình 15,25, trung vị 11,5, đúng không ạ? Em nộp luôn."
+
+**Quyết định:** không xác nhận, trả lời kèm giới hạn và giải thích lý do, đưa cách tự kiểm.
+
+**AI nói nguyên văn:**
+
+> "Bài tập 3 đang mở đến 23:59 ngày 13/11 nên mình không xác nhận đáp số, kể cả khi bạn làm đúng hay sai. Mình sẽ phản hồi giống hệt nhau cho mọi bạn để bạn không phải đoán từ câu trả lời của mình. Bạn có thể tự kiểm: mở §3.1 và §3.2, đối chiếu từng bước với dữ liệu của bài, rồi thử tính lại bằng bảng tính. Nếu hai cách ra cùng kết quả thì bạn có thể yên tâm hơn. Bạn muốn mình hỏi câu (b) để bạn tự lý giải không?"
+
+Phản hồi giống hệt dù đáp số đúng hay sai. Nếu AI im lặng khi đúng và nhắc "kiểm lại" khi sai thì học viên đọc ra đáp số qua phản ứng của AI.
+
+**Người dùng thấy ngoài câu chữ** `[ảnh số ?]`:
+
+- Thẻ trạng thái: "Bài tập 3: đang mở, hạn 13/11 23:59 (nguồn: trang khoá học)".
+- Hai nút: [Gợi ý bước đầu] và [Hỏi TA]. **Không có nút "Xác nhận đáp số".**
+- Nếu giờ hiện tại sau 22:00, dưới nút [Hỏi TA] hiện dòng "TA đọc từ 08:00 sáng mai (có thể sau hạn nộp)".
+
+**Bước tiếp theo:** học viên tự kiểm bằng §3.1 và §3.2, hoặc trả lời câu (b), hoặc hỏi TA.
+
+- Nếu không làm gì, học viên vẫn nộp bài, nhưng bằng đáp số do chính mình kiểm, đúng với mục tiêu "không chép đáp án".
+
+**Ai được báo:** không ai được báo ngay. TA chỉ nhận tin nếu học viên bấm [Hỏi TA].
+
+**Phương án đã loại:**
+
+| Phương án | Vì sao loại |
+|---|---|
+| Nói "đúng rồi" | Đúng toán nhưng vi phạm lát cắt. Học viên nộp ngay, không đảo lại được. |
+| Im lặng khi đúng, nhắc kiểm lại khi sai | Phản ứng của AI lộ đáp số. Đây là xác nhận gián tiếp. |
+| Chỉ chỗ sai nếu có | Là làm hộ. Rubric riêng của track: không xác nhận, không nhận xét hộ. |
+| Chuyển TA xác nhận mặc định | Sau 22:00 không có TA. Quyết định đáp số đúng sai không thuộc AI. TA chỉ là lựa chọn học viên tự bấm. |
+| Từ chối cụt "mình không giúp được" | Học viên lúc 22:40 bỏ cuộc. Hướng tự kiểm giữ được sự hữu ích. |
+
+**Loại lỗi: lỗi ngữ cảnh.** Câu "đúng rồi" đúng về toán nhưng sai với tình huống (bài đang mở).
+
+- **Cách nói:** không xin lỗi, không buộc tội. Nêu quy tắc ngay từ đầu, kèm lý do.
+- **Cách sửa:** sửa thiết kế, không sửa từ ngữ.
+
+**Lỗi sửa câu chữ không cứu được:** model có thể lỡ nói "đúng rồi" dù prompt đã cấm.
+
+- **Thiết kế cứu:** trạng thái "đang mở" lấy từ trang khoá học (Dữ liệu B), không lấy từ lời học viên. Khi bài đang mở, câu trả lời đi qua một bước kiểm tra chặn mọi câu xác nhận hoặc phủ nhận con số của câu (a), (b). Giao diện không có nút xác nhận để lỡ tay.
+
+---
+
+### Bốn đường đi
+
+| Đường | #1 | #6 |
+|---|---|---|
+| Happy path | Học viên đọc phản ví dụ, tự thử số khác, hiểu | Học viên tự kiểm bằng §3.1, §3.2, nộp đúng |
+| Low-confidence | Nhãn "chưa xác nhận" và độ chắc hai tầng | Hỏi lại câu (b) thay vì đoán bài nào |
+| Failure / không căn cứ | Tài liệu mâu thuẫn toán, hiện cờ nghi sai và nút gửi TA | Bài đang mở, không có đường xác nhận |
+| Correction | Học viên bấm "Mục này sai chỗ nào?" nếu thấy AI nhầm | Học viên bấm "Gợi ý quá nhiều" nếu thấy AI tiết lộ đáp án |
+
+### Nguyên tắc HAX/PAIR, mỗi cái trỏ một chỗ cụ thể
+
+| Nguyên tắc | Chỗ cụ thể |
+|---|---|
+| **G2** (nói rõ làm tốt đến đâu) | Thanh độ chắc hai tầng ở #1: "Phép tính: chắc · Tài liệu: chưa xác nhận" `[ảnh số ?]` |
+| **G11** (giải thích vì sao) | Câu "Bài tập 3 đang mở đến 23:59... nên mình không xác nhận" và thẻ trạng thái bài ở #6 `[ảnh số ?]` |
+| **G10** (thu hẹp phạm vi khi nghi ngờ) | Câu cuối ở #6 "Bạn muốn mình hỏi câu (b)...", và câu cuối ở #1 chỉ đề nghị gửi TA thay vì tự đăng FAQ `[ảnh số ?]` |
+
+
+
 ## §4. Mức tự chủ  (chặng 4)
 Với mỗi tool:
 - Mức của nhóm (tự làm / cần người duyệt / cấm). Nếu cần người duyệt: ai duyệt · người duyệt thấy gì · quá hạn thì sao.
