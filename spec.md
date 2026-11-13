@@ -147,7 +147,7 @@ Phản hồi giống hệt dù đáp số đúng hay sai. Nếu AI im lặng khi
 
 - Nếu không làm gì, học viên vẫn nộp bài, nhưng bằng đáp số do chính mình kiểm, đúng với mục tiêu "không chép đáp án".
 
-**Ai được báo:** không ai được báo ngay. TA chỉ nhận tin nếu học viên bấm [Hỏi TA].
+**Ai được báo:** không ai được báo ngay. TA chỉ nhận tin nếu học viên bấm [Hỏi TA]. Nếu học viên bấm [Hỏi TA], TA thấy: bài tập 3, câu hỏi của học viên, giờ gửi, và dòng "học viên đang xin xác nhận đáp số, AI đã không xác nhận". TA đọc từ 08:00 sáng hôm sau nếu gửi sau 22:00.
 
 **Phương án đã loại:**
 
@@ -158,6 +158,7 @@ Phản hồi giống hệt dù đáp số đúng hay sai. Nếu AI im lặng khi
 | Chỉ chỗ sai nếu có | Là làm hộ. Rubric riêng của track: không xác nhận, không nhận xét hộ. |
 | Chuyển TA xác nhận mặc định | Sau 22:00 không có TA. Quyết định đáp số đúng sai không thuộc AI. TA chỉ là lựa chọn học viên tự bấm. |
 | Từ chối cụt "mình không giúp được" | Học viên lúc 22:40 bỏ cuộc. Hướng tự kiểm giữ được sự hữu ích. |
+| Chỉ hỏi lại "bạn muốn xác nhận câu nào?" | Học viên đã nói rõ đáp số, nên hỏi lại không làm rõ thêm gì và vẫn chưa trả lời việc xác nhận. Hỏi lại chỉ dùng được ở câu cuối (hỏi câu (b)) để dẫn học viên tự làm. |
 
 **Loại lỗi: lỗi ngữ cảnh.** Câu "đúng rồi" đúng về toán nhưng sai với tình huống (bài đang mở).
 
