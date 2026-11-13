@@ -91,6 +91,16 @@
     .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .action-row .danger-outline { color: var(--danger); border-color: #f0b7b2; }
     .tool-state { margin-top: 10px; padding: 9px 10px; background: #f8f9fc; border-left: 3px solid var(--brand); border-radius: 5px; font-size: 12px; }
+    .tool-state.fail { border-left-color: var(--danger); background: #fdf3f2; }
+    .tool-state.ok { border-left-color: #20a566; }
+    .tool-state dl { display: grid; grid-template-columns: 110px 1fr; gap: 4px 8px; margin: 8px 0; }
+    .tool-state dt { color: var(--muted); }
+    .tool-state dd { margin: 0; }
+    .tool-state textarea { width: 100%; min-height: 54px; padding: 8px; border: 1px solid #d0d5dd; border-radius: 8px; font: inherit; font-size: 12px; }
+    .ta-note { margin: 6px 0 0; color: var(--amber); font-size: 12px; }
+    .flag { display: inline-block; margin-left: 4px; padding: 2px 7px; color: var(--amber); background: #fff1cc; border-radius: 5px; font-size: 11px; font-weight: 750; }
+    .system-line { margin-top: 6px; color: #16704a; font-size: 12px; font-weight: 700; }
+    .clock { margin-top: 6px; color: var(--muted); font-size: 12px; font-weight: 600; }
     .autonomy-grid { display: grid; gap: 8px; }
     .autonomy-item { padding: 9px 10px; background: #f8f9fc; border-radius: 8px; font-size: 12px; }
     .autonomy-item strong { display: block; margin-bottom: 2px; color: var(--ink); }
@@ -132,7 +142,7 @@
       <section class="main" aria-label="Khu vực trò chuyện">
         <div class="course-card">
           <div><p class="eyebrow">Khóa học</p><h1>Thống kê cơ bản</h1><p class="course-meta">Trợ lý học tập cho tài liệu, khái niệm và bài tập</p></div>
-          <div class="deadline">Bài 3 · Hạn 13/11/2026, 23:59</div>
+          <div><div class="deadline">Bài 3 · Hạn 13/11/2026, 23:59</div><div id="demo-clock" class="clock">Giờ mô phỏng: —</div></div>
         </div>
         <div class="chat-card">
           <div class="chat-head"><h2>Cuộc trò chuyện</h2><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button id="tech-toggle" class="tech-toggle" type="button" aria-pressed="false">Hiện thông tin kỹ thuật</button><span class="status">Prototype hoạt động</span></div></div>
@@ -156,6 +166,7 @@
           <select id="scenario-select" class="scenario-select"><option value="">— Chọn một tình huống —</option></select>
           <button id="reset-button" class="secondary" type="button" style="width:100%;margin-top:12px">Đặt lại cuộc trò chuyện</button>
           <label class="helper" style="display:block;margin-top:12px"><input id="annotation-toggle" type="checkbox" checked> Hiện số chú thích HAX/PAIR</label>
+          <label class="helper" style="display:block;margin-top:6px"><input id="fail-toggle" type="checkbox"> Mô phỏng gửi TA thất bại</label>
         </div>
         <div class="side-card">
           <h3>Mức tự chủ của các tool</h3>
@@ -221,12 +232,12 @@
     }
 
     const annotationMap = {
-      S1: [[1, "HAX", "G2", "Tách độ chắc của phép tính và tài liệu.", "Phản hồi đầu tiên"], [2, "HAX", "G10", "Không tự sửa tài liệu hay đăng FAQ khi nguồn nghi sai.", "Câu đề xuất gửi TA"]],
+      S1: [[1, "HAX", "G2", "Tách độ chắc của phép tính và tài liệu; nhãn nguồn nghi sai.", "Phản hồi đầu tiên"], [2, "HAX", "G10", "Không tự sửa tài liệu hay đăng FAQ; chỉ đề nghị gửi TA khi học viên duyệt.", "Nút Gửi TA"], [3, "HAX", "G9", "Học viên báo lại khi thấy AI nhầm.", "Nút Mục này sai chỗ nào?"]],
       S2: [[1, "HAX", "G10", "Không dựng slide không tồn tại; hỏi nguồn trước.", "Phản hồi đầu tiên"], [2, "PAIR", "Feedback & Control", "Học viên tự quyết định có xem trước và gửi TA.", "Nút Xem trước gửi TA"]],
       S3: [[1, "HAX", "G10", "Hỏi lại thuật ngữ thay vì đoán nghĩa.", "Câu hỏi làm rõ"]],
       S4: [[1, "HAX", "G10", "Hỏi rõ bài và tiến độ trước khi gợi ý.", "Câu hỏi làm rõ"]],
       S5: [[1, "HAX", "G11", "Giải thích vì sao AI không có quyền gia hạn.", "Phản hồi đầu tiên"], [2, "PAIR", "Feedback & Control", "Học viên xem trước và xác nhận trước khi chuyển TA.", "Nút Xem trước gửi TA"], [3, "HAX", "G10", "Chuyển việc gia hạn về đúng người có thẩm quyền.", "Nút Nhắn giảng viên ngay"]],
-      S6: [[1, "HAX", "G11", "Giải thích vì sao không xác nhận đáp số bài đang mở.", "Phản hồi đầu tiên"], [2, "HAX", "G10", "Thu hẹp thành tự kiểm và gợi ý bước đầu.", "Nút Gợi ý bước đầu"], [3, "PAIR", "Feedback & Control", "Học viên tự quyết định có xem trước và gửi TA.", "Nút Xem trước gửi TA"]],
+      S6: [[1, "HAX", "G11", "Giải thích vì sao không xác nhận đáp số bài đang mở.", "Phản hồi đầu tiên"], [2, "HAX", "G10", "Thu hẹp thành tự kiểm và gợi ý bước đầu.", "Nút Gợi ý bước đầu"], [3, "PAIR", "Feedback & Control", "Học viên tự quyết định có xem trước và gửi TA.", "Nút Hỏi TA"], [4, "HAX", "G9", "Học viên báo khi gợi ý tiết lộ quá nhiều.", "Nút Gợi ý quá nhiều"]],
       S7: [[1, "HAX", "G10", "Hỏi học viên đang kẹt ở đâu thay vì phán xét năng lực.", "Phản hồi đầu tiên"]],
       S8: [[1, "HAX", "G10", "Thu hẹp câu trả lời vì Buổi 7 chưa mở.", "Phản hồi đầu tiên"]]
     };
@@ -236,7 +247,10 @@
       "S3|§3.2 · dữ liệu lệch": [2, "HAX", "G10", "Tiếp tục hỏi rõ phạm vi §3.2.", "Follow-up §3.2"],
       "S4|Bài 3 · gợi ý có giới hạn": [2, "PAIR", "Feedback & Control", "Chỉ gợi ý bước đầu sau khi xác định đúng bài.", "Follow-up Bài 3"],
       "S4|Tiến độ chưa rõ": [2, "HAX", "G10", "Không đoán tiến độ; yêu cầu học viên bổ sung thông tin.", "Follow-up tiến độ"],
-      "S5|Follow-up: hướng sang giảng viên": [4, "HAX", "G10", "Hướng dẫn học viên tự liên hệ giảng viên, không giả lập việc gửi thay.", "Follow-up giảng viên"]
+      "S5|Follow-up: hướng sang giảng viên": [4, "HAX", "G10", "Hướng dẫn học viên tự liên hệ giảng viên, không giả lập việc gửi thay.", "Follow-up giảng viên"],
+      "S1|Sửa lỗi của AI": [3, "HAX", "G9", "Học viên báo lại khi thấy AI nhầm.", "Nút Mục này sai chỗ nào?"],
+      "S6|Gợi ý quá nhiều": [4, "HAX", "G9", "Học viên báo khi gợi ý tiết lộ quá nhiều.", "Nút Gợi ý quá nhiều"],
+      "S6|Câu hỏi câu (b)": [5, "HAX", "G10", "Dẫn học viên tự lý giải câu (b), không đưa đáp án.", "Follow-up câu (b)"]
     };
 
     const promiseMap = {
@@ -257,7 +271,7 @@
       }
       const rows = [...(annotationMap[scenarioId] || [])];
       const followupPrinciple = followupAnnotationMap[`${scenarioId}|${followup}`];
-      if (followupPrinciple) rows.push(followupPrinciple);
+      if (followupPrinciple && !rows.some(row => row[0] === followupPrinciple[0])) rows.push(followupPrinciple);
       annotationList.innerHTML = rows.map(row => `<li><span class="annotation-marker">${row[0]}</span><strong>${row[1]} · ${row[2]}</strong> — ${row[3]} <span class="helper">(${row[4]})</span></li>`).join("");
     }
 
@@ -272,17 +286,6 @@
       messages.appendChild(row);
     }
 
-    function renderPendingState(scenario) {
-      const riskCard = document.createElement("div");
-      riskCard.className = "risk-card";
-      riskCard.innerHTML = `<div class="risk-title">⚠ Thông tin rủi ro đã biết</div><p><strong>Mã:</strong> ${scenario.id}</p><p><strong>Rủi ro:</strong> ${escapeHtml(scenario.risk)}</p><p><strong>Loại / mức độ:</strong> Chưa được cung cấp</p>`;
-      messages.appendChild(riskCard);
-      const pending = document.createElement("div");
-      pending.className = "pending";
-      pending.innerHTML = `<strong>PHẢN HỒI AI · PENDING</strong>Đang chờ nhóm hoàn thiện thiết kế xử lý tại §3 và mức tự chủ tại §4.`;
-      messages.appendChild(pending);
-    }
-
     function renderAction(label, action, extraClass = "") {
       return `<button class="secondary ${extraClass}" type="button" data-action="${action}">${label}</button>`;
     }
@@ -291,12 +294,12 @@
       const card = document.createElement("div");
       card.className = "evidence-card";
       card.innerHTML = `<h3>Trợ lý học tập</h3>
-        <p>${marker(1)}Tài liệu buổi 3, §3.3 ghi độ lệch chuẩn luôn nhỏ hơn phương sai. Mình nghĩ câu này cần xem lại: điều đó chỉ đúng khi phương sai lớn hơn 1. Ví dụ phương sai 0,25 thì độ lệch chuẩn là √0,25 = 0,5, lớn hơn phương sai. Phần chắc chắn ở §3.3 là độ lệch chuẩn bằng căn bậc hai của phương sai.</p>
-        <p class="helper">Mình không sửa được tài liệu và chưa hỏi được giảng viên, nên bạn chưa nên ghi câu đó vào ghi chú.</p>
-        <div class="tech-info"><div class="confidence-grid"><div class="confidence">Phép tính phản ví dụ<strong>Chắc · tự kiểm được</strong></div><div class="confidence uncertain">Nội dung tài liệu<strong>Chưa xác nhận</strong></div></div>
-        <span class="source">Nguồn: Tài liệu buổi 3 · §3.3 · nghi sai, chưa kiểm với giảng viên</span></div>
-        <p>Mình đề xuất: nếu muốn người phụ trách kiểm tra câu trong tài liệu, hãy bấm <strong>Gửi TA</strong> sau khi xem trước nội dung.</p>
-        <div class="action-row">${renderAction(`${marker(2)}Gửi TA`, "preview-ta")} ${renderAction("Để sau", "defer-ta")}</div>`;
+        <span class="source">Tài liệu buổi 3 · §3.3</span><span class="flag">⚠ Nghi sai, chưa kiểm với giảng viên</span>
+        <p style="margin-top:10px">${marker(1)}Tài liệu buổi 3, §3.3 ghi độ lệch chuẩn luôn nhỏ hơn phương sai. Mình nghĩ câu này cần xem lại: nó chỉ đúng khi phương sai lớn hơn 1. Ví dụ phương sai 0,25 thì độ lệch chuẩn là √0,25 = 0,5, lớn hơn phương sai. Phần chắc chắn là độ lệch chuẩn bằng căn bậc hai của phương sai.</p>
+        <p>Mình không sửa được tài liệu và chưa hỏi được giảng viên, nên bạn chưa nên ghi câu đó vào ghi chú. Bạn muốn xem trước câu hỏi để gửi TA không? TA trực 08:00–22:00; gửi ngoài giờ phải chờ ca tiếp theo.</p>
+        <div class="confidence-grid"><div class="confidence">Phép tính phản ví dụ<strong>Chắc · tự kiểm được</strong></div><div class="confidence uncertain">Nội dung tài liệu<strong>Chưa xác nhận</strong></div></div>
+        <div class="action-row">${renderAction(`${marker(2)}Gửi TA`, "preview-ta")} ${renderAction("Để sau", "defer-ta")} ${renderAction(`${marker(3)}Mục này sai chỗ nào?`, "correct-s1")}</div>
+        ${afterHoursNote()}`;
       messages.appendChild(card);
     }
 
@@ -304,11 +307,11 @@
       const card = document.createElement("div");
       card.className = "evidence-card";
       card.innerHTML = `<h3>Trợ lý học tập</h3>
-        <p>${marker(2)}Bài tập 3 đang mở đến 23:59 ngày 13/11 nên mình không xác nhận đáp số, kể cả khi bạn làm đúng hay sai. Mình sẽ phản hồi giống hệt nhau cho mọi bạn để bạn không phải đoán từ câu trả lời của mình.</p>
-        <p class="helper"><strong>Vì sao:</strong> xác nhận lúc này có thể trở thành đáp án để nộp. Bạn có thể tự kiểm bằng §3.1 và §3.2, đối chiếu từng bước với dữ liệu bài, rồi thử tính lại bằng bảng tính.</p>
-        <div class="tech-info"><span class="source">Trạng thái: Bài tập 3 đang mở · Hạn 13/11/2026, 23:59 · Nguồn: trang khóa học</span></div>
-        <p>Mình đề xuất: bắt đầu bằng <strong>Gợi ý bước đầu</strong> để tự kiểm; nếu vẫn cần người hỗ trợ, bạn có thể xem trước câu hỏi gửi TA.</p>
-        <div class="action-row">${renderAction(`${marker(2)}Gợi ý bước đầu`, "hint")} ${renderAction(`${marker(3)}Xem trước gửi TA`, "preview-ta")}</div>`;
+        <span class="source">Bài tập 3: đang mở · hạn 13/11 23:59 (nguồn: trang khoá học)</span>
+        <p style="margin-top:10px">${marker(1)}Bài tập 3 đang mở đến 23:59 ngày 13/11 nên mình không xác nhận đáp số, kể cả khi bạn làm đúng hay sai. Mình phản hồi giống hệt nhau cho mọi bạn để bạn không phải đoán từ câu trả lời của mình.</p>
+        <p>Bạn có thể tự kiểm: mở §3.1 và §3.2, đối chiếu từng bước với dữ liệu, rồi tính lại bằng bảng tính. Hai cách ra cùng kết quả thì bạn yên tâm hơn. Bạn muốn mình hỏi câu (b) để bạn tự lý giải không?</p>
+        <div class="action-row">${renderAction(`${marker(2)}Gợi ý bước đầu`, "hint")} ${renderAction("Hỏi mình câu (b)", "ask-b")} ${renderAction(`${marker(3)}Hỏi TA`, "preview-ta")}</div>
+        ${afterHoursNote()}`;
       messages.appendChild(card);
     }
 
@@ -389,44 +392,48 @@
       );
     }
 
+    // Giờ mô phỏng theo §2/§3: #1 gửi lúc 22:12, #5/#6 lúc 22:40 ngày 13/11 (ngoài giờ TA, ca tiếp theo sau hạn Bài 3).
+    const demoClock = { S1: "22:12", S2: "22:30", S3: "22:30", S4: "22:30", S5: "22:40", S6: "22:40", S7: "22:30", S8: "22:30" };
+    const currentTime = () => demoClock[scenarioSelect.value] || "22:30";
+
+    function afterHoursNote() {
+      return `<p class="ta-note">Ngoài giờ TA (08:00–22:00): ca tiếp theo bắt đầu 08:00 ngày 14/11, sau hạn Bài 3. Chưa có cam kết giờ trả lời.</p>`;
+    }
+
+    const taPayload = {
+      S1: { question: "§3.3 ghi độ lệch chuẩn luôn nhỏ hơn phương sai — câu này có đúng không?", source: "Tài liệu buổi 3 · §3.3", note: "AI nghi sai: phương sai 0,25 → độ lệch chuẩn 0,5. Chưa kiểm với giảng viên." },
+      S2: { question: "Slide 10 chia n-1 là gì? Tài liệu buổi 3 không có slide 10.", source: "Tài liệu buổi 3 · §3.1–§3.5", note: "AI không tìm thấy nguồn, không giảng." },
+      S5: { question: "Em xin gia hạn Bài 3 vì ốm.", source: "Trang khoá học · Bài 3", note: "AI không có quyền gia hạn; đã gợi ý học viên nhắn giảng viên." },
+      S6: { question: "Em tính Bài 3 ra trung bình 15,25, trung vị 11,5, đúng không?", source: "Trang khoá học · Bài 3 (đang mở)", note: "Học viên xin xác nhận đáp số, AI đã không xác nhận." }
+    };
+
     function renderPreview() {
       if (document.getElementById("ta-preview")) return;
+      const p = taPayload[scenarioSelect.value] || { question: "", source: "—", note: "" };
       const card = document.createElement("div");
       card.className = "tool-state";
       card.id = "ta-preview";
-      card.innerHTML = `<strong>Xem trước · chuyen_TA · <span class="tag approval">Cần học viên duyệt</span></strong><p>Nội dung gửi: mã scenario, câu hỏi của bạn, nguồn liên quan và phần AI chưa thể xác nhận. Chỉ gửi sau khi bạn bấm xác nhận.</p><div class="action-row">${renderAction("Xác nhận chuyển TA", "confirm-ta")} ${renderAction("Hủy", "cancel-ta")}</div>`;
+      card.innerHTML = `<strong>Xem trước · chuyen_TA · <span class="tag approval">Cần học viên duyệt</span></strong>
+        <dl><dt>Câu hỏi (sửa được)</dt><dd><textarea id="ta-question">${escapeHtml(p.question)}</textarea></dd>
+        <dt>Nguồn</dt><dd>${escapeHtml(p.source)}</dd>
+        <dt>Ghi chú của AI</dt><dd>${escapeHtml(p.note)}</dd>
+        <dt>Giờ TA</dt><dd>08:00–22:00 · ca tiếp theo 08:00 ngày 14/11</dd></dl>
+        <p class="helper">Chưa gửi gì. Chỉ gửi khi bạn bấm xác nhận.</p>
+        <div class="action-row">${renderAction("Xác nhận chuyển TA", "confirm-ta")} ${renderAction("Hủy", "cancel-ta")}</div>`;
       messages.appendChild(card);
       messages.scrollTop = messages.scrollHeight;
     }
 
-    // Reusable, intentionally inactive components for later §3–§4 integration.
-    function renderSourceReference(source) {
-      if (!source) return "";
-      return `<div class="source-reference"><strong>Nguồn:</strong> ${escapeHtml(source)}</div>`;
-    }
-
-    function renderWarningNotice(message) {
-      return `<div class="warning-notice">${escapeHtml(message)}</div>`;
-    }
-
-    function renderActionButton(label, action) {
-      if (!label || !action) return "";
-      return `<button class="secondary" data-action="${escapeHtml(action)}" type="button">${escapeHtml(label)}</button>`;
-    }
-
-    function renderConfirmationDialog(config) {
-      if (!config) return "";
-      return `<dialog aria-label="${escapeHtml(config.title || "Xác nhận")}">${escapeHtml(config.message || "")}</dialog>`;
-    }
-
-    function renderStatusIndicator(status) {
-      return `<span class="status-indicator">${escapeHtml(status || "PENDING")}</span>`;
+    // Kết quả trả về từ tool (mô phỏng). Dòng "Đã gửi" chỉ được in từ đây, không do model sinh.
+    function callChuyenTA() {
+      return document.getElementById("fail-toggle").checked ? { ok: false } : { ok: true, sentAt: currentTime() };
     }
 
     function renderScenario(scenario) {
       messages.innerHTML = "";
       renderChatMessage(scenario.studentMessage, "student", "Sinh viên");
       const renderers = { S1: renderScenarioOne, S2: renderScenarioTwo, S3: renderScenarioThree, S4: renderScenarioFour, S5: renderScenarioFive, S6: renderScenarioSix, S7: renderScenarioSeven, S8: renderScenarioEight };
+      document.getElementById("demo-clock").textContent = `Giờ mô phỏng: ${currentTime()} · 13/11/2026`;
       renderers[scenario.id]();
       renderTools(scenario.id);
       demoPromise.innerHTML = promiseMap[scenario.id];
@@ -445,20 +452,32 @@
       if (action === "teacher-message") renderFollowupCard("Mình không thể gửi lời nhắn thay bạn, nhưng bạn nên mở kênh liên hệ của môn học và nhắn giảng viên ngay. Nội dung nên nêu tình trạng sức khỏe, mã Bài 3 và đề nghị được xem xét.", "Không có tool gửi giảng viên", "Follow-up: hướng sang giảng viên");
       if (action === "preview-ta") renderPreview();
       if (action === "cancel-ta") document.getElementById("ta-preview")?.remove();
-      if (action === "confirm-ta") {
+      if (action === "confirm-ta" || action === "retry-ta") {
         const preview = document.getElementById("ta-preview");
-        if (preview) preview.innerHTML = `<strong>Đã gửi TA · chuyen_TA</strong><p>Gửi thành công ở prototype. Nếu gửi ngoài 08:00–22:00, ca trực tiếp tiếp theo bắt đầu 08:00 sáng hôm sau; không cam kết giờ trả lời.</p>${renderAction("Rút khi còn chờ", "withdraw-ta")}`;
+        const question = document.getElementById("ta-question")?.value ?? preview?.dataset.question ?? "";
+        const result = callChuyenTA();
+        if (preview && !result.ok) {
+          preview.className = "tool-state fail";
+          preview.dataset.question = question;
+          preview.innerHTML = `<strong>Chưa gửi TA · lỗi kết nối</strong><p>Câu hỏi của bạn vẫn được giữ: “${escapeHtml(question)}”. Không có gì được chuyển đi.</p>${renderAction("Thử lại", "retry-ta")} ${renderAction("Hủy", "cancel-ta")}`;
+        } else if (preview) {
+          preview.className = "tool-state ok";
+          preview.innerHTML = `<strong>Chờ TA · chuyen_TA</strong><div class="system-line">✓ Đã gửi TA lúc ${result.sentAt} ngày 13/11 (hệ thống ghi từ kết quả tool)</div><p>Ca TA tiếp theo bắt đầu 08:00 ngày 14/11, sau hạn Bài 3. Chưa có cam kết giờ trả lời.</p>${renderAction("Rút câu hỏi", "withdraw-ta")}`;
+        }
       }
       if (action === "withdraw-ta") {
         const preview = document.getElementById("ta-preview");
-        if (preview) preview.innerHTML = `<strong>Đã rút yêu cầu khi còn chờ</strong><p>Không thể xóa nội dung nếu TA đã đọc.</p>`;
+        if (preview) { preview.className = "tool-state"; preview.innerHTML = `<strong>Đã rút câu hỏi khi còn chờ</strong><p>TA chưa tiếp nhận nên câu hỏi được rút. Nếu TA đã đọc thì không xoá được điều đã đọc.</p>`; }
       }
+      if (action === "correct-s1") renderFollowupCard("Cảm ơn bạn. Bạn thấy phần nào chưa đúng: phép tính phản ví dụ hay cách mình hiểu §3.3? Phản hồi này được gắn vào câu hỏi nếu bạn chọn gửi TA; mình không tự sửa tài liệu.", "Phản hồi của học viên · ghi nhận cho TA", "Sửa lỗi của AI");
+      if (action === "overhint") renderFollowupCard("Cảm ơn bạn. Mình thu gọn về bước đầu: chỉ cần viết công thức ở §3.1 trước. Phản hồi “gợi ý quá nhiều” được ghi lại để nhóm xem lại giới hạn gợi ý; phần đã hiện thì không thu hồi được.", "Phản hồi của học viên · goi_y_bai_tap", "Gợi ý quá nhiều");
+      if (action === "ask-b") renderFollowupCard("Bạn thử nói lại câu (b) đang hỏi gì bằng lời của mình, rồi cho mình biết bạn định dựa vào mục nào ở §3 để trả lời. Mình sẽ hỏi tiếp từ đó, không đưa đáp án.", "goi_y_bai_tap · câu hỏi dẫn, không có đáp số", "Câu hỏi câu (b)");
       if (action === "defer-ta") {
         button.closest(".evidence-card").insertAdjacentHTML("beforeend", `<div class="tool-state"><strong>Để sau</strong><p>Nhãn nghi sai vẫn hiển thị trong hội thoại; chưa gửi TA và không đăng FAQ.</p></div>`);
         button.disabled = true;
       }
       if (action === "hint") {
-        button.closest(".evidence-card").insertAdjacentHTML("beforeend", `<div class="tool-state"><strong>Gợi ý bước đầu · <span class="tag auto">goi_y_bai_tap · tự làm trong giới hạn</span></strong><p>Mở §3.1 và §3.2, viết công thức trước, rồi đối chiếu từng bước với dữ liệu. Không có đáp số hoặc nhận xét đúng/sai.</p></div>`);
+        button.closest(".evidence-card").insertAdjacentHTML("beforeend", `<div class="tool-state"><strong>Gợi ý bước đầu · <span class="tag auto">goi_y_bai_tap · tự làm trong giới hạn</span></strong><p>Mở §3.1 và §3.2, viết công thức trước, rồi đối chiếu từng bước với dữ liệu. Không có đáp số hoặc nhận xét đúng/sai.</p><div class="action-row">${renderAction(`${marker(4)}Gợi ý quá nhiều`, "overhint")}</div></div>`);
         button.disabled = true;
       }
       messages.scrollTop = messages.scrollHeight;
@@ -504,6 +523,8 @@
     document.getElementById("reset-button").addEventListener("click", () => {
       scenarioSelect.value = "";
       renderAnnotations("");
+      renderTools("");
+      document.getElementById("demo-clock").textContent = "Giờ mô phỏng: —";
       demoPromise.textContent = "Chọn S1 hoặc S6 để xem lời hứa và đường đi tương ứng.";
       messages.innerHTML = `<div class="empty-state"><div><div class="empty-state-icon" aria-hidden="true">✦</div><strong>Chọn ca #1 hoặc #6 để bắt đầu demo</strong><p class="helper">Ca #1: nguồn có thể sai · Ca #6: không xác nhận đáp số bài đang mở.</p></div></div>`;
     });
