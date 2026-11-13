@@ -6,6 +6,7 @@
 | Vũ Ngọc Tùng | 2A202604106 | |
 | Nguyễn Ngọc Bách | 2A202604108 | |
 | Nguyễn Trọng Khiêm | 2A202604109 | |
+| Đặng Thùy Dung | 2A202604116 | |
 
 ## §1. Lát cắt & phạm vi
 
