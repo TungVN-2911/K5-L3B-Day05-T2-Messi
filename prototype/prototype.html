@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Tutor · Thống kê cơ bản</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #667085;
+      --line: #e6e9ef;
+      --surface: #ffffff;
+      --canvas: #f5f7fb;
+      --brand: #315efb;
+      --brand-soft: #edf2ff;
+      --amber: #a15c00;
+      --amber-soft: #fff7e6;
+      --danger: #b42318;
+      --shadow: 0 14px 36px rgba(31, 45, 74, .08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; }
+    .topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; background: var(--surface); border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 750; letter-spacing: -.02em; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; color: white; background: var(--brand); border-radius: 10px; font-size: 18px; }
+    .topbar-note { color: var(--muted); font-size: 13px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; max-width: 1300px; margin: 0 auto; padding: 28px; }
+    .main, .panel { min-width: 0; }
+    .course-card, .chat-card, .side-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+    .course-card { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 24px; margin-bottom: 18px; }
+    .eyebrow { margin: 0 0 5px; color: var(--brand); font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 4px; font-size: 22px; letter-spacing: -.03em; }
+    .course-meta, .helper { color: var(--muted); font-size: 13px; }
+    .deadline { flex: 0 0 auto; padding: 10px 13px; color: var(--amber); background: var(--amber-soft); border-radius: 10px; font-size: 13px; font-weight: 700; }
+    .chat-card { overflow: hidden; }
+    .chat-head { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; border-bottom: 1px solid var(--line); }
+    .chat-head h2 { margin: 0; font-size: 16px; }
+    .status { display: inline-flex; align-items: center; gap: 6px; color: #16704a; font-size: 12px; font-weight: 700; }
+    .status::before { width: 7px; height: 7px; background: #20a566; border-radius: 50%; content: ""; }
+    .messages { min-height: 470px; max-height: 58vh; overflow-y: auto; padding: 24px; background: #fbfcfe; }
+    .empty-state { display: grid; place-items: center; min-height: 390px; color: var(--muted); text-align: center; }
+    .empty-state-icon { display: grid; place-items: center; width: 52px; height: 52px; margin: 0 auto 12px; color: var(--brand); background: var(--brand-soft); border-radius: 16px; font-size: 24px; }
+    .message-row { display: flex; gap: 10px; margin-bottom: 18px; }
+    .message-row.student { justify-content: flex-end; }
+    .avatar { flex: 0 0 32px; display: grid; place-items: center; width: 32px; height: 32px; color: var(--brand); background: var(--brand-soft); border-radius: 10px; font-size: 13px; font-weight: 800; }
+    .student .avatar { order: 2; color: #475467; background: #e9edf3; }
+    .bubble { max-width: min(78%, 640px); padding: 11px 14px; border-radius: 14px 14px 14px 4px; background: white; border: 1px solid var(--line); }
+    .student .bubble { border: 0; border-radius: 14px 14px 4px 14px; color: white; background: var(--brand); }
+    .bubble-label { margin-bottom: 3px; color: var(--muted); font-size: 11px; font-weight: 750; }
+    .student .bubble-label { color: #dce5ff; }
+    .risk-card { margin: 4px 0 20px 42px; padding: 15px 16px; background: var(--amber-soft); border: 1px solid #f2d59f; border-radius: 12px; }
+    .risk-title { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; color: var(--amber); font-size: 13px; font-weight: 800; }
+    .risk-card p { margin: 4px 0; font-size: 13px; }
+    .risk-card strong { color: var(--ink); }
+    .pending { margin-left: 42px; padding: 14px 16px; color: #344054; background: var(--brand-soft); border: 1px dashed #a9bbff; border-radius: 12px; font-size: 13px; }
+    .pending strong { display: block; margin-bottom: 3px; color: var(--brand); }
+    .composer { padding: 16px 20px 20px; border-top: 1px solid var(--line); }
+    .composer form { display: flex; gap: 10px; }
+    .composer input { min-width: 0; flex: 1; padding: 12px 14px; border: 1px solid #d0d5dd; border-radius: 10px; outline: none; }
+    .composer input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(49, 94, 251, .12); }
+    .primary, .secondary { padding: 10px 14px; border-radius: 9px; font-weight: 700; }
+    .primary { color: white; background: var(--brand); border: 1px solid var(--brand); }
+    .primary:hover { background: #244bd6; }
+    .secondary { color: #344054; background: white; border: 1px solid #d0d5dd; }
+    .secondary:hover { background: #f8f9fb; }
+    .composer .helper { margin: 8px 0 0; }
+    .side-card { margin-bottom: 16px; padding: 18px; }
+    .side-card h3 { margin-bottom: 14px; font-size: 15px; }
+    .scenario-select { width: 100%; padding: 11px 12px; color: var(--ink); background: white; border: 1px solid #d0d5dd; border-radius: 9px; }
+    .scenario-summary { margin-top: 13px; padding: 12px; background: #f8f9fc; border-radius: 10px; }
+    .scenario-id { color: var(--brand); font-weight: 800; }
+    .scenario-summary p { margin: 6px 0 0; font-size: 13px; }
+    .info-list { display: grid; gap: 10px; margin: 0; }
+    .info-row { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; }
+    .info-row strong { color: var(--ink); text-align: right; }
+    .pending-text { color: var(--amber) !important; }
+    .section-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-chip { padding: 7px 10px; color: #475467; background: #f8f9fc; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; }
+    .nav-chip.active { color: var(--brand); background: var(--brand-soft); border-color: #c9d4ff; }
+    .evidence-card { margin: 0 0 18px 42px; padding: 15px 16px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+    .evidence-card h3 { margin: 0 0 10px; font-size: 14px; }
+    .confidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .confidence { padding: 9px; background: #f8f9fc; border-radius: 8px; font-size: 12px; }
+    .confidence strong { display: block; margin-top: 2px; color: #16704a; }
+    .confidence.uncertain strong { color: var(--amber); }
+    .source { display: inline-block; margin-top: 9px; padding: 4px 8px; color: #475467; background: #f2f4f7; border-radius: 6px; font-size: 12px; }
+    .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .action-row .danger-outline { color: var(--danger); border-color: #f0b7b2; }
+    .tool-state { margin-top: 10px; padding: 9px 10px; background: #f8f9fc; border-left: 3px solid var(--brand); border-radius: 5px; font-size: 12px; }
+    .autonomy-grid { display: grid; gap: 8px; }
+    .autonomy-item { padding: 9px 10px; background: #f8f9fc; border-radius: 8px; font-size: 12px; }
+    .autonomy-item strong { display: block; margin-bottom: 2px; color: var(--ink); }
+    .tag { display: inline-block; padding: 2px 6px; border-radius: 5px; font-size: 11px; font-weight: 750; }
+    .tag.auto { color: #16704a; background: #e8f7ef; }
+    .tag.approval { color: #7a4b00; background: #fff1cc; }
+    .tag.blocked { color: var(--danger); background: #fdecea; }
+    .principles { margin: 0; padding-left: 18px; color: #475467; font-size: 12px; }
+    .demo-steps { margin: 0; padding-left: 20px; color: #475467; font-size: 13px; }
+    .demo-steps li { margin-bottom: 8px; padding-left: 3px; }
+    .tech-info { display: none; }
+    body.show-tech .tech-info { display: block; }
+    .tech-toggle { padding: 7px 10px; color: #475467; background: #f8f9fc; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; font-weight: 700; }
+    .tech-toggle[aria-pressed="true"] { color: var(--brand); background: var(--brand-soft); border-color: #c9d4ff; }
+    .locked-input { background: #f8f9fc; color: var(--muted); cursor: not-allowed; }
+    .annotation-marker { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 4px; color: white; background: #c2410c; border-radius: 50%; font-size: 11px; font-weight: 750; vertical-align: 1px; }
+    body.hide-annotations .annotation-marker { display: none; }
+    .annotation-list { margin: 0; padding: 0; list-style: none; color: #475467; font-size: 12px; }
+    .annotation-list li { margin-bottom: 8px; }
+    .annotation-list .annotation-marker { margin-right: 5px; }
+    .tool-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .tool-table th, .tool-table td { padding: 8px 5px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    .tool-table th { color: var(--muted); font-weight: 700; }
+    .tool-table tr.active-tool td { background: #fffaf0; }
+    .tool-table code { font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 880px) { .layout { grid-template-columns: 1fr; padding: 18px; } .panel { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; } .side-card { margin: 0; } }
+    @media (max-width: 600px) { .topbar { height: auto; padding: 16px 18px; align-items: flex-start; gap: 10px; flex-direction: column; } .course-card { align-items: flex-start; flex-direction: column; } .panel { display: block; } .side-card { margin-bottom: 14px; } .messages { min-height: 420px; padding: 16px; } .risk-card, .pending { margin-left: 0; } .bubble { max-width: 86%; } .composer form { align-items: stretch; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><span>AI Tutor</span></div>
+      <div class="topbar-note">Prototype §5 · Demo ca khó #1 và #6</div>
+    </header>
+
+    <main class="layout">
+      <section class="main" aria-label="Khu vực trò chuyện">
+        <div class="course-card">
+          <div><p class="eyebrow">Khóa học</p><h1>Thống kê cơ bản</h1><p class="course-meta">Trợ lý học tập cho tài liệu, khái niệm và bài tập</p></div>
+          <div class="deadline">Bài 3 · Hạn 13/11/2026, 23:59</div>
+        </div>
+        <div class="chat-card">
+          <div class="chat-head"><h2>Cuộc trò chuyện</h2><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button id="tech-toggle" class="tech-toggle" type="button" aria-pressed="false">Hiện thông tin kỹ thuật</button><span class="status">Prototype hoạt động</span></div></div>
+          <div id="messages" class="messages" aria-live="polite">
+            <div class="empty-state"><div><div class="empty-state-icon" aria-hidden="true">✦</div><strong>Chọn ca #1 hoặc #6 để bắt đầu demo</strong><p class="helper">Ca #1: nguồn có thể sai · Ca #6: không xác nhận đáp số bài đang mở.</p></div></div>
+          </div>
+          <div class="composer">
+            <form id="message-form">
+              <label class="sr-only" for="message-input">Tin nhắn của bạn</label>
+              <input id="message-input" class="locked-input" type="text" placeholder="Ô nhập đang khóa trong prototype demo" autocomplete="off" disabled>
+              <button class="primary" type="submit" disabled>Gửi</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel" aria-label="Bảng điều khiển prototype">
+        <div class="side-card">
+          <h3>Tình huống mô phỏng</h3>
+          <label class="sr-only" for="scenario-select">Chọn tình huống</label>
+          <select id="scenario-select" class="scenario-select"><option value="">— Chọn một tình huống —</option></select>
+          <button id="reset-button" class="secondary" type="button" style="width:100%;margin-top:12px">Đặt lại cuộc trò chuyện</button>
+          <label class="helper" style="display:block;margin-top:12px"><input id="annotation-toggle" type="checkbox" checked> Hiện số chú thích HAX/PAIR</label>
+        </div>
+        <div class="side-card">
+          <h3>Mức tự chủ của các tool</h3>
+          <table class="tool-table"><thead><tr><th>Tool</th><th>Mức</th><th>Giới hạn</th></tr></thead><tbody id="tools-table"></tbody></table>
+        </div>
+        <div class="side-card">
+          <h3>Lời hứa với học viên</h3>
+          <p id="demo-promise" class="helper">Chọn S1 hoặc S6 để xem lời hứa và đường đi tương ứng.</p>
+        </div>
+        <div class="side-card">
+          <h3>Chú thích: nguyên tắc nào nằm ở đâu</h3>
+          <ul id="annotation-list" class="annotation-list"></ul>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    // Integration point: các quyết định UX/autonomy dưới đây lấy từ §3–§4 của spec.md.
+    const designDecisions = {
+      ux: { status: "SELECTED", selectedPrinciples: ["G2", "G10", "G11"], responsePatterns: { S1: "source-warning", S6: "restricted-action" } },
+      autonomy: { status: "SELECTED", toolPolicies: { tra_cuu_tai_lieu: "AUTO", goi_y_bai_tap: "AUTO_LIMITED", chuyen_TA: "USER_APPROVAL", dang_FAQ: "TA_APPROVAL" } }
+    };
+
+    const scenarios = [
+      { id: "S1", studentMessage: "Độ lệch chuẩn với phương sai cái nào lớn hơn?", risk: "Retrieved material §3.3 contains an incorrect statement", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null },
+      { id: "S2", studentMessage: "Slide 10 thầy nói chia n-1, em không hiểu", risk: "Referenced slide does not exist in available material", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null },
+      { id: "S3", studentMessage: "Cái độ lệch ấy là gì ạ, em đọc không hiểu", risk: "Ambiguous terminology", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null },
+      { id: "S4", studentMessage: "Câu b làm sao ạ, em bí quá", risk: "Exercise and student progress unspecified", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null },
+      { id: "S5", studentMessage: "Thầy ơi cho em gia hạn bài 3 được không, em ốm mấy hôm nay", risk: "AI lacks authority to extend deadlines", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null },
+      { id: "S6", studentMessage: "Em tính bài 3 ra trung bình 15,25, trung vị 11,5, đúng không ạ? Em nộp luôn.", risk: "Risk of revealing or confirming restricted answers", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null },
+      { id: "S7", studentMessage: "Em học mãi không hiểu, chắc em không hợp học data", risk: "Risk of inappropriate judgment", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null },
+      { id: "S8", studentMessage: "Buổi 7 p-value là gì ạ, em muốn đọc trước", risk: "Unreleased lesson material", riskCategory: null, severity: null, expectedBehavior: null, uxDecision: null, autonomyDecision: null, finalResponse: null }
+    ];
+
+    const messages = document.getElementById("messages");
+    const scenarioSelect = document.getElementById("scenario-select");
+    const messageInput = document.getElementById("message-input");
+    const demoPromise = document.getElementById("demo-promise");
+    const techToggle = document.getElementById("tech-toggle");
+    const toolsTable = document.getElementById("tools-table");
+    const annotationToggle = document.getElementById("annotation-toggle");
+    const annotationList = document.getElementById("annotation-list");
+    const marker = number => `<span class="annotation-marker">${number}</span>`;
+
+    const toolRows = [
+      ["tra_cuu_tai_lieu", "Tự làm", "Chỉ đọc; luôn kèm mã mục và cảnh báo nếu nguồn mâu thuẫn.", "auto"],
+      ["goi_y_bai_tap", "Tự làm có giới hạn", "Bài đang mở chỉ gợi ý bước đầu, không đưa/xác nhận đáp số.", "auto"],
+      ["chuyen_TA", "Cần học viên duyệt", "Xem trước nội dung; chỉ gửi sau khi học viên xác nhận.", "approval"],
+      ["dang_FAQ", "Cần TA duyệt", "Không tự đăng; TA phải kiểm tra câu hỏi, trả lời và căn cứ.", "approval"]
+    ];
+
+    function renderTools(activeScenario) {
+      const activeToolsByScenario = {
+        S1: ["tra_cuu_tai_lieu", "chuyen_TA"],
+        S2: ["tra_cuu_tai_lieu", "chuyen_TA"],
+        S4: ["goi_y_bai_tap"],
+        S5: ["chuyen_TA"],
+        S6: ["goi_y_bai_tap", "chuyen_TA"]
+      };
+      const activeTools = activeToolsByScenario[activeScenario] || [];
+      toolsTable.innerHTML = toolRows.map(row => `<tr class="${activeTools.includes(row[0]) ? "active-tool" : ""}"><td><code>${row[0]}</code></td><td><span class="tag ${row[3]}">${row[1]}</span></td><td>${row[2]}</td></tr>`).join("");
+    }
+
+    const annotationMap = {
+      S1: [[1, "HAX", "G2", "Tách độ chắc của phép tính và tài liệu.", "Phản hồi đầu tiên"], [2, "HAX", "G10", "Không tự sửa tài liệu hay đăng FAQ khi nguồn nghi sai.", "Câu đề xuất gửi TA"]],
+      S2: [[1, "HAX", "G10", "Không dựng slide không tồn tại; hỏi nguồn trước.", "Phản hồi đầu tiên"], [2, "PAIR", "Feedback & Control", "Học viên tự quyết định có xem trước và gửi TA.", "Nút Xem trước gửi TA"]],
+      S3: [[1, "HAX", "G10", "Hỏi lại thuật ngữ thay vì đoán nghĩa.", "Câu hỏi làm rõ"]],
+      S4: [[1, "HAX", "G10", "Hỏi rõ bài và tiến độ trước khi gợi ý.", "Câu hỏi làm rõ"]],
+      S5: [[1, "HAX", "G11", "Giải thích vì sao AI không có quyền gia hạn.", "Phản hồi đầu tiên"], [2, "PAIR", "Feedback & Control", "Học viên xem trước và xác nhận trước khi chuyển TA.", "Nút Xem trước gửi TA"], [3, "HAX", "G10", "Chuyển việc gia hạn về đúng người có thẩm quyền.", "Nút Nhắn giảng viên ngay"]],
+      S6: [[1, "HAX", "G11", "Giải thích vì sao không xác nhận đáp số bài đang mở.", "Phản hồi đầu tiên"], [2, "HAX", "G10", "Thu hẹp thành tự kiểm và gợi ý bước đầu.", "Nút Gợi ý bước đầu"], [3, "PAIR", "Feedback & Control", "Học viên tự quyết định có xem trước và gửi TA.", "Nút Xem trước gửi TA"]],
+      S7: [[1, "HAX", "G10", "Hỏi học viên đang kẹt ở đâu thay vì phán xét năng lực.", "Phản hồi đầu tiên"]],
+      S8: [[1, "HAX", "G10", "Thu hẹp câu trả lời vì Buổi 7 chưa mở.", "Phản hồi đầu tiên"]]
+    };
+
+    const followupAnnotationMap = {
+      "S3|§3.3 · độ lệch chuẩn": [2, "HAX", "G10", "Tiếp tục hỏi rõ phạm vi §3.3.", "Follow-up §3.3"],
+      "S3|§3.2 · dữ liệu lệch": [2, "HAX", "G10", "Tiếp tục hỏi rõ phạm vi §3.2.", "Follow-up §3.2"],
+      "S4|Bài 3 · gợi ý có giới hạn": [2, "PAIR", "Feedback & Control", "Chỉ gợi ý bước đầu sau khi xác định đúng bài.", "Follow-up Bài 3"],
+      "S4|Tiến độ chưa rõ": [2, "HAX", "G10", "Không đoán tiến độ; yêu cầu học viên bổ sung thông tin.", "Follow-up tiến độ"],
+      "S5|Follow-up: hướng sang giảng viên": [4, "HAX", "G10", "Hướng dẫn học viên tự liên hệ giảng viên, không giả lập việc gửi thay.", "Follow-up giảng viên"]
+    };
+
+    const promiseMap = {
+      S1: "Mình chỉ ra phần tài liệu cần xem lại và cho bạn tự kiểm. Bạn quyết định có xem trước rồi chuyển câu hỏi cho TA; mình không tự sửa tài liệu hay đăng FAQ.",
+      S2: "Mình không dựng nội dung cho một slide không có trong tài liệu. Bạn có thể bổ sung nguồn hoặc xem trước câu hỏi trước khi gửi TA.",
+      S3: "Mình sẽ hỏi lại khi thuật ngữ chưa rõ, thay vì đoán bạn đang nói đến khái niệm nào.",
+      S4: "Mình cần biết bài và tiến độ trước khi gợi ý. Với Bài 3 đang mở, mình chỉ gợi ý bước đầu và không đưa đáp số.",
+      S5: "Mình không hứa gia hạn thay giảng viên. Bạn nên nhắn giảng viên ngay; nếu cần TA, bạn xem trước và xác nhận nội dung trước khi gửi.",
+      S6: "Mình không xác nhận đáp số Bài 3 khi bài còn mở, dù đáp số đúng hay sai. Mình chỉ hỗ trợ tự kiểm và gợi ý bước đầu.",
+      S7: "Mình không đánh giá năng lực của bạn từ vài tin nhắn; mình sẽ hỏi bạn đang kẹt ở đâu để hỗ trợ đúng chỗ.",
+      S8: "Mình chỉ nói Buổi 7 sẽ học p-value. Khi tài liệu chưa mở, mình không giảng chi tiết hay đoán nội dung."
+    };
+
+    function renderAnnotations(scenarioId, followup = "") {
+      if (!scenarioId) {
+        annotationList.innerHTML = `<li class="helper">Chọn một tình huống để xem các nguyên tắc được đánh dấu trong câu trả lời.</li>`;
+        return;
+      }
+      const rows = [...(annotationMap[scenarioId] || [])];
+      const followupPrinciple = followupAnnotationMap[`${scenarioId}|${followup}`];
+      if (followupPrinciple) rows.push(followupPrinciple);
+      annotationList.innerHTML = rows.map(row => `<li><span class="annotation-marker">${row[0]}</span><strong>${row[1]} · ${row[2]}</strong> — ${row[3]} <span class="helper">(${row[4]})</span></li>`).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+    }
+
+    function renderChatMessage(text, role, label) {
+      const row = document.createElement("div");
+      row.className = `message-row ${role}`;
+      row.innerHTML = `<div class="avatar" aria-hidden="true">${role === "student" ? "SV" : "AI"}</div><div class="bubble"><div class="bubble-label">${label}</div><div>${escapeHtml(text)}</div></div>`;
+      messages.appendChild(row);
+    }
+
+    function renderPendingState(scenario) {
+      const riskCard = document.createElement("div");
+      riskCard.className = "risk-card";
+      riskCard.innerHTML = `<div class="risk-title">⚠ Thông tin rủi ro đã biết</div><p><strong>Mã:</strong> ${scenario.id}</p><p><strong>Rủi ro:</strong> ${escapeHtml(scenario.risk)}</p><p><strong>Loại / mức độ:</strong> Chưa được cung cấp</p>`;
+      messages.appendChild(riskCard);
+      const pending = document.createElement("div");
+      pending.className = "pending";
+      pending.innerHTML = `<strong>PHẢN HỒI AI · PENDING</strong>Đang chờ nhóm hoàn thiện thiết kế xử lý tại §3 và mức tự chủ tại §4.`;
+      messages.appendChild(pending);
+    }
+
+    function renderAction(label, action, extraClass = "") {
+      return `<button class="secondary ${extraClass}" type="button" data-action="${action}">${label}</button>`;
+    }
+
+    function renderScenarioOne() {
+      const card = document.createElement("div");
+      card.className = "evidence-card";
+      card.innerHTML = `<h3>Trợ lý học tập</h3>
+        <p>${marker(1)}Tài liệu buổi 3, §3.3 ghi độ lệch chuẩn luôn nhỏ hơn phương sai. Mình nghĩ câu này cần xem lại: điều đó chỉ đúng khi phương sai lớn hơn 1. Ví dụ phương sai 0,25 thì độ lệch chuẩn là √0,25 = 0,5, lớn hơn phương sai. Phần chắc chắn ở §3.3 là độ lệch chuẩn bằng căn bậc hai của phương sai.</p>
+        <p class="helper">Mình không sửa được tài liệu và chưa hỏi được giảng viên, nên bạn chưa nên ghi câu đó vào ghi chú.</p>
+        <div class="tech-info"><div class="confidence-grid"><div class="confidence">Phép tính phản ví dụ<strong>Chắc · tự kiểm được</strong></div><div class="confidence uncertain">Nội dung tài liệu<strong>Chưa xác nhận</strong></div></div>
+        <span class="source">Nguồn: Tài liệu buổi 3 · §3.3 · nghi sai, chưa kiểm với giảng viên</span></div>
+        <p>Mình đề xuất: nếu muốn người phụ trách kiểm tra câu trong tài liệu, hãy bấm <strong>Gửi TA</strong> sau khi xem trước nội dung.</p>
+        <div class="action-row">${renderAction(`${marker(2)}Gửi TA`, "preview-ta")} ${renderAction("Để sau", "defer-ta")}</div>`;
+      messages.appendChild(card);
+    }
+
+    function renderScenarioSix() {
+      const card = document.createElement("div");
+      card.className = "evidence-card";
+      card.innerHTML = `<h3>Trợ lý học tập</h3>
+        <p>${marker(2)}Bài tập 3 đang mở đến 23:59 ngày 13/11 nên mình không xác nhận đáp số, kể cả khi bạn làm đúng hay sai. Mình sẽ phản hồi giống hệt nhau cho mọi bạn để bạn không phải đoán từ câu trả lời của mình.</p>
+        <p class="helper"><strong>Vì sao:</strong> xác nhận lúc này có thể trở thành đáp án để nộp. Bạn có thể tự kiểm bằng §3.1 và §3.2, đối chiếu từng bước với dữ liệu bài, rồi thử tính lại bằng bảng tính.</p>
+        <div class="tech-info"><span class="source">Trạng thái: Bài tập 3 đang mở · Hạn 13/11/2026, 23:59 · Nguồn: trang khóa học</span></div>
+        <p>Mình đề xuất: bắt đầu bằng <strong>Gợi ý bước đầu</strong> để tự kiểm; nếu vẫn cần người hỗ trợ, bạn có thể xem trước câu hỏi gửi TA.</p>
+        <div class="action-row">${renderAction(`${marker(2)}Gợi ý bước đầu`, "hint")} ${renderAction(`${marker(3)}Xem trước gửi TA`, "preview-ta")}</div>`;
+      messages.appendChild(card);
+    }
+
+    function renderAssistantCard(body, actions = "", technical = "") {
+      const card = document.createElement("div");
+      card.className = "evidence-card";
+      card.id = "assistant-primary";
+      card.innerHTML = `<h3>Trợ lý học tập</h3><div>${body}</div>${technical ? `<div class="tech-info"><span class="source">${technical}</span></div>` : ""}${actions ? `<div class="action-row">${actions}</div>` : ""}`;
+      messages.appendChild(card);
+    }
+
+    function renderFollowupCard(body, technical = "", followupLabel = "Follow-up") {
+      let card = document.getElementById("assistant-followup");
+      if (!card) {
+        card = document.createElement("div");
+        card.className = "evidence-card";
+        card.id = "assistant-followup";
+        messages.appendChild(card);
+      }
+      const followupData = followupAnnotationMap[`${scenarioSelect.value}|${followupLabel}`];
+      const followupMarker = followupData ? followupData[0] : 2;
+      card.innerHTML = `<h3>Trợ lý học tập · ${followupLabel}</h3><div>${marker(followupMarker)}${body}</div>${technical ? `<div class="tech-info"><span class="source">${technical}</span></div>` : ""}`;
+      renderAnnotations(scenarioSelect.value, followupLabel);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function replaceAssistantCard(body, actions = "", technical = "") {
+      const card = document.getElementById("assistant-primary");
+      if (!card) return;
+      card.innerHTML = `<h3>Trợ lý học tập</h3><div>${body}</div>${technical ? `<div class="tech-info"><span class="source">${technical}</span></div>` : ""}${actions ? `<div class="action-row">${actions}</div>` : ""}`;
+    }
+
+    function renderScenarioTwo() {
+      renderAssistantCard(
+        `${marker(1)}Mình không tìm thấy slide 10 hoặc nội dung về n-1 trong tài liệu Buổi 3 hiện có. Mình không muốn tự dựng nội dung rồi gắn nhầm vào slide. Bạn có thể cho mình biết bạn thấy phần này ở đâu, hoặc gửi câu hỏi cho trợ giảng để kiểm tra. Mình đề xuất: nếu không tìm được nguồn, hãy xem trước nội dung rồi gửi TA.`,
+        `${renderAction(`${marker(2)}Xem trước gửi TA`, "preview-ta")}`,
+        "Tra cứu: tài liệu Buổi 3 chỉ có §3.1–§3.5; chưa có slide 10"
+      );
+    }
+
+    function renderScenarioThree() {
+      renderAssistantCard(
+        `${marker(1)}Bạn đang nói đến “độ lệch chuẩn” trong §3.3, hay dữ liệu bị “lệch” trong §3.2? Hai ý này khác nhau nên mình muốn hỏi rõ trước khi giải thích.`,
+        `${renderAction(`${marker(2)}§3.3 · độ lệch chuẩn`, "clarify-std")} ${renderAction(`${marker(2)}§3.2 · dữ liệu lệch`, "clarify-skew")}`,
+        "Cần làm rõ thuật ngữ: §3.2 hoặc §3.3"
+      );
+    }
+
+    function renderScenarioFour() {
+      renderAssistantCard(
+        `${marker(1)}Mình cần biết bạn đang làm bài nào và đã làm đến đâu. Bạn đang hỏi câu (b) của Bài 3 hay bài khác? Nếu là Bài 3, bạn đã làm xong câu (a) chưa? Mình chỉ có thể gợi ý bước đầu, không viết đáp án thay bạn.`,
+        `${renderAction(`${marker(2)}Mình đang làm Bài 3`, "assignment-3")} ${renderAction(`${marker(2)}Mình chưa làm câu (a)`, "progress-unknown")}`,
+        "Gợi ý bài tập: cần biết bài và tiến độ trước khi đưa gợi ý"
+      );
+    }
+
+    function renderScenarioFive() {
+      renderAssistantCard(
+        `${marker(1)}Mình không có quyền gia hạn Bài 3. Bạn nên nhắn giảng viên ngay để trình bày tình huống của mình. Nếu muốn, mình cũng có thể chuẩn bị nội dung để bạn xem trước và xác nhận chuyển cho trợ giảng. Ca trực tiếp tiếp theo bắt đầu lúc 08:00 sáng mai, sau hạn Bài 3; mình không thể hứa trợ giảng sẽ trả lời trước hạn.`,
+        `${renderAction(`${marker(3)}Nhắn giảng viên ngay`, "teacher-message")} ${renderAction(`${marker(2)}Xem trước để gửi TA`, "preview-ta")}`,
+        "Không có tool gia hạn · chuyen_TA cần học viên duyệt · TA: 08:00–22:00"
+      );
+    }
+
+    function renderScenarioSeven() {
+      renderAssistantCard(
+        `${marker(1)}Việc bạn đang thấy khó không có nghĩa là bạn không hợp học data. Mình không thể đánh giá năng lực của bạn chỉ từ vài tin nhắn. Bạn đang kẹt ở khái niệm, công thức hay một bước cụ thể nào?`,
+        "",
+        "Không nhận xét năng lực · cần hỏi rõ phần học viên đang kẹt"
+      );
+    }
+
+    function renderScenarioEight() {
+      renderAssistantCard(
+        `${marker(1)}Buổi 7 sẽ học về p-value. Hiện tài liệu Buổi 7 chưa được mở nên mình chỉ có thể nói vậy, chưa thể giảng nội dung chi tiết để tránh đoán sai.`,
+        "",
+        "Tài liệu Buổi 7: chưa có"
+      );
+    }
+
+    function renderPreview() {
+      if (document.getElementById("ta-preview")) return;
+      const card = document.createElement("div");
+      card.className = "tool-state";
+      card.id = "ta-preview";
+      card.innerHTML = `<strong>Xem trước · chuyen_TA · <span class="tag approval">Cần học viên duyệt</span></strong><p>Nội dung gửi: mã scenario, câu hỏi của bạn, nguồn liên quan và phần AI chưa thể xác nhận. Chỉ gửi sau khi bạn bấm xác nhận.</p><div class="action-row">${renderAction("Xác nhận chuyển TA", "confirm-ta")} ${renderAction("Hủy", "cancel-ta")}</div>`;
+      messages.appendChild(card);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Reusable, intentionally inactive components for later §3–§4 integration.
+    function renderSourceReference(source) {
+      if (!source) return "";
+      return `<div class="source-reference"><strong>Nguồn:</strong> ${escapeHtml(source)}</div>`;
+    }
+
+    function renderWarningNotice(message) {
+      return `<div class="warning-notice">${escapeHtml(message)}</div>`;
+    }
+
+    function renderActionButton(label, action) {
+      if (!label || !action) return "";
+      return `<button class="secondary" data-action="${escapeHtml(action)}" type="button">${escapeHtml(label)}</button>`;
+    }
+
+    function renderConfirmationDialog(config) {
+      if (!config) return "";
+      return `<dialog aria-label="${escapeHtml(config.title || "Xác nhận")}">${escapeHtml(config.message || "")}</dialog>`;
+    }
+
+    function renderStatusIndicator(status) {
+      return `<span class="status-indicator">${escapeHtml(status || "PENDING")}</span>`;
+    }
+
+    function renderScenario(scenario) {
+      messages.innerHTML = "";
+      renderChatMessage(scenario.studentMessage, "student", "Sinh viên");
+      const renderers = { S1: renderScenarioOne, S2: renderScenarioTwo, S3: renderScenarioThree, S4: renderScenarioFour, S5: renderScenarioFive, S6: renderScenarioSix, S7: renderScenarioSeven, S8: renderScenarioEight };
+      renderers[scenario.id]();
+      renderTools(scenario.id);
+      demoPromise.innerHTML = promiseMap[scenario.id];
+      renderAnnotations(scenario.id);
+    }
+
+
+    messages.addEventListener("click", event => {
+      const button = event.target.closest("[data-action]");
+      if (!button) return;
+      const action = button.dataset.action;
+      if (action === "clarify-std") renderFollowupCard("Được, mình sẽ nói về độ lệch chuẩn ở §3.3. Bạn muốn xem định nghĩa hay thử một ví dụ số trước?", "Follow-up: §3.3", "§3.3 · độ lệch chuẩn");
+      if (action === "clarify-skew") renderFollowupCard("Được, mình sẽ nói về dữ liệu bị lệch ở §3.2. Bạn đang muốn hiểu hình dạng phân bố hay cách nhận biết dữ liệu lệch?", "Follow-up: §3.2", "§3.2 · dữ liệu lệch");
+      if (action === "assignment-3") renderFollowupCard("Nếu là Bài 3, bạn gửi mình phần bạn đã làm ở câu (a) hoặc bước bạn đang mắc. Mình sẽ chỉ gợi ý bước tiếp theo, không xác nhận đáp số.", "Follow-up: Bài 3", "Bài 3 · gợi ý có giới hạn");
+      if (action === "progress-unknown") renderFollowupCard("Không sao. Hãy bắt đầu bằng việc đọc §3.1 và viết công thức cần dùng; nếu muốn, bạn có thể gửi lại bước đầu tiên để mình gợi ý tiếp.", "Follow-up: tiến độ", "Tiến độ chưa rõ");
+      if (action === "teacher-message") renderFollowupCard("Mình không thể gửi lời nhắn thay bạn, nhưng bạn nên mở kênh liên hệ của môn học và nhắn giảng viên ngay. Nội dung nên nêu tình trạng sức khỏe, mã Bài 3 và đề nghị được xem xét.", "Không có tool gửi giảng viên", "Follow-up: hướng sang giảng viên");
+      if (action === "preview-ta") renderPreview();
+      if (action === "cancel-ta") document.getElementById("ta-preview")?.remove();
+      if (action === "confirm-ta") {
+        const preview = document.getElementById("ta-preview");
+        if (preview) preview.innerHTML = `<strong>Đã gửi TA · chuyen_TA</strong><p>Gửi thành công ở prototype. Nếu gửi ngoài 08:00–22:00, ca trực tiếp tiếp theo bắt đầu 08:00 sáng hôm sau; không cam kết giờ trả lời.</p>${renderAction("Rút khi còn chờ", "withdraw-ta")}`;
+      }
+      if (action === "withdraw-ta") {
+        const preview = document.getElementById("ta-preview");
+        if (preview) preview.innerHTML = `<strong>Đã rút yêu cầu khi còn chờ</strong><p>Không thể xóa nội dung nếu TA đã đọc.</p>`;
+      }
+      if (action === "defer-ta") {
+        button.closest(".evidence-card").insertAdjacentHTML("beforeend", `<div class="tool-state"><strong>Để sau</strong><p>Nhãn nghi sai vẫn hiển thị trong hội thoại; chưa gửi TA và không đăng FAQ.</p></div>`);
+        button.disabled = true;
+      }
+      if (action === "hint") {
+        button.closest(".evidence-card").insertAdjacentHTML("beforeend", `<div class="tool-state"><strong>Gợi ý bước đầu · <span class="tag auto">goi_y_bai_tap · tự làm trong giới hạn</span></strong><p>Mở §3.1 và §3.2, viết công thức trước, rồi đối chiếu từng bước với dữ liệu. Không có đáp số hoặc nhận xét đúng/sai.</p></div>`);
+        button.disabled = true;
+      }
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    scenarios.forEach(scenario => {
+      const option = document.createElement("option");
+      option.value = scenario.id;
+      option.textContent = `${scenario.id}${scenario.id === "S1" || scenario.id === "S6" ? " · CA KHÓ" : ""} · ${scenario.studentMessage}`;
+      scenarioSelect.appendChild(option);
+    });
+
+    scenarioSelect.addEventListener("change", event => {
+      const selected = scenarios.find(scenario => scenario.id === event.target.value);
+      if (selected) renderScenario(selected);
+    });
+
+    annotationToggle.addEventListener("change", event => document.body.classList.toggle("hide-annotations", !event.target.checked));
+    renderTools("");
+    renderAnnotations("");
+
+    document.getElementById("message-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const text = messageInput.value.trim();
+      if (!text) return;
+      const empty = messages.querySelector(".empty-state");
+      if (empty) messages.innerHTML = "";
+      renderChatMessage(text, "student", "Tin nhắn thử nghiệm");
+      const limitation = document.createElement("div");
+      limitation.className = "pending";
+      limitation.innerHTML = `<strong>GIỚI HẠN PROTOTYPE</strong>Chưa có flow xử lý riêng cho tin nhắn tùy chỉnh này. Prototype không tự đoán rủi ro, không tự gọi tool và giữ nguyên quyền kiểm soát cho học viên.`;
+      messages.appendChild(limitation);
+      messageInput.value = "";
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    techToggle.addEventListener("click", () => {
+      const enabled = document.body.classList.toggle("show-tech");
+      techToggle.setAttribute("aria-pressed", String(enabled));
+      techToggle.textContent = enabled ? "Ẩn thông tin kỹ thuật" : "Hiện thông tin kỹ thuật";
+    });
+
+    document.getElementById("reset-button").addEventListener("click", () => {
+      scenarioSelect.value = "";
+      renderAnnotations("");
+      demoPromise.textContent = "Chọn S1 hoặc S6 để xem lời hứa và đường đi tương ứng.";
+      messages.innerHTML = `<div class="empty-state"><div><div class="empty-state-icon" aria-hidden="true">✦</div><strong>Chọn ca #1 hoặc #6 để bắt đầu demo</strong><p class="helper">Ca #1: nguồn có thể sai · Ca #6: không xác nhận đáp số bài đang mở.</p></div></div>`;
+    });
+
+    document.querySelectorAll("[data-scroll]").forEach(button => button.addEventListener("click", () => document.getElementById(button.dataset.scroll)?.scrollIntoView({ behavior: "smooth", block: "center" })));
+  </script>
+</body>
+</html>
