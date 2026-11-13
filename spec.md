@@ -183,9 +183,9 @@ Phản hồi giống hệt dù đáp số đúng hay sai. Nếu AI im lặng khi
 
 | Nguyên tắc | Chỗ cụ thể |
 |---|---|
-| **G2** (nói rõ làm tốt đến đâu) | Thanh độ chắc hai tầng ở #1: "Phép tính: chắc · Tài liệu: chưa xác nhận" `[ảnh số ?]` |
-| **G11** (giải thích vì sao) | Câu "Bài tập 3 đang mở đến 23:59... nên mình không xác nhận" và thẻ trạng thái bài ở #6 `[ảnh số ?]` |
-| **G10** (thu hẹp phạm vi khi nghi ngờ) | Câu cuối ở #6 "Bạn muốn mình hỏi câu (b)...", và câu cuối ở #1 chỉ đề nghị gửi TA thay vì tự đăng FAQ `[ảnh số ?]` |
+| **G2** (nói rõ AI làm tốt đến đâu) | Ở #1, AI chắc về phép tính nhưng chưa chắc về nội dung tài liệu. Thanh độ chắc hai tầng ở #1: "Phép tính: chắc · Tài liệu: chưa xác nhận" |
+| **G11** (giải thích vì sao AI làm vậy ) | Ở #6, AI từ chối xác nhận, nên phải nói lý do. Câu "Bài tập 3 đang mở đến 23:59... nên mình không xác nhận" để học viên không thấy bị gạt đi|
+| **G10** (thu hẹp phạm vi khi nghi ngờ) | Cả 2 kịch bản, AI không làm liều: Câu cuối ở #6 "Bạn muốn mình hỏi câu (b)...", và câu cuối ở #1 chỉ đề nghị gửi TA thay vì tự đăng FAQ  |
 
 
 
