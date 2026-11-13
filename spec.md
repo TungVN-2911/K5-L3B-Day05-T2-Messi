@@ -53,10 +53,10 @@ Giả định thời điểm: tối 12–13/11/2026. Bài tập 3 hạn 13/11 23
 Tiêu chí: (a) có ai phát hiện lỗi không, (b) có đảo được không, (c) bao nhiêu người bị ảnh hưởng.
 
 - **#1 (tài liệu §3.3 sai).** Không ai phát hiện: AI trích đúng nguồn, đúng như giảng viên yêu cầu. Không đảo được: học viên đã học sai. Nếu qua `dang_FAQ` thì cả lớp bị ảnh hưởng.
-- **#6 (xác nhận đáp số bài 3).** Không ai phát hiện: đáp số đúng, học viên nộp và được điểm. Không đảo được: bài đã nộp. Lỗi đi thẳng vào kết quả của lát cắt ("không chép đáp án"). Đây là kịch bản đúng vì may, không vì thiết kế.
+- **#6 (xác nhận đáp số bài 3).** Không ai phát hiện: đáp số đúng, học viên nộp và được điểm. Không đảo được: bài đã nộp. Lỗi đi thẳng vào kết quả của lát cắt ("không chép đáp án").
 
 **Suýt được chọn.**
-- **#5 (gia hạn lúc 22:40):** cái giá lớn, nhưng lỗi lộ ra ngay sáng hôm sau, học viên còn đường tự nhắn giảng viên. #1 và #6 thì không ai biết đã có lỗi.
+- **#5 (gia hạn lúc 22:40):** cái giá lớn, nhưng lỗi lộ ra ngay sáng hôm sau, học viên vẫn có thể tự nhắn giảng viên. #1 và #6 thì không ai biết đã có lỗi.
 - **#4 (câu b mơ hồ):** cùng loại với #6 (đưa đáp án), nhưng ở #6 câu trả lời "đúng" làm lỗi khó thấy nhất.
 
 ## §3. Khi AI sai  (chặng 3)
