@@ -3,10 +3,10 @@
 
 | Họ và Tên | Mã Học Viên | Việc đã làm |
 | :--- | :---: | ---: |
-| Vũ Ngọc Tùng | 2A202604106 | |
-| Nguyễn Ngọc Bách | 2A202604108 | |
-| Nguyễn Trọng Khiêm | 2A202604109 | Chặng 4: mức tự chủ cho bốn tool, đối chiếu ba kịch bản và quy tắc bàn giao UX/prototype. |
-| Đặng Thùy Dung | 2A202604116 | |
+| Vũ Ngọc Tùng | 2A202604106 | Phân tích lát cắt sản phẩm, người dùng và 8 kịch bản rủi ro ở Chặng 1–2; xác định hai ca có chi phí sai cao nhất. |
+| Nguyễn Ngọc Bách | 2A202604108 | Thiết kế Chặng 3: phản hồi khi AI sai cho ca tài liệu §3.3 có mâu thuẫn và ca xin xác nhận đáp số Bài 3; xây dựng nguyên tắc HAX/PAIR tương ứng. |
+| Nguyễn Trọng Khiêm | 2A202604109 | Thiết kế Chặng 4: mức tự chủ cho bốn tool, đối chiếu ba kịch bản, quy tắc bàn giao và điều kiện duyệt/rút trong UX prototype. |
+| Đặng Thùy Dung | 2A202604116 | Xây dựng và hoàn thiện prototype HTML Chặng 5: flow chat S1–S8, bảng autonomy, marker HAX/PAIR, trạng thái chuyển TA và kiểm thử tương tác. |
 
 ## §1. Lát cắt & phạm vi
 
